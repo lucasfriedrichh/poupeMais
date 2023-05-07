@@ -1,13 +1,13 @@
-package br.upf.services;
+package br.upf.poupeMais.domain.services;
 
 import java.util.List;
 import java.util.Optional;
 
+import br.upf.poupeMais.domain.repository.ExpenseRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.upf.model.ExpenseRecord;
-import br.upf.repository.ExpenseRecordRepository;
+import br.upf.poupeMais.domain.model.ExpenseRecord;
 
 @Service
 public class ExpenseRecordService {

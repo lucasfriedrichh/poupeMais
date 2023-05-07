@@ -1,4 +1,4 @@
-package br.upf.services;
+package br.upf.poupeMais.domain.services;
 
 import java.util.List;
 import java.util.Optional;
@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.upf.model.ExpenseCategory;
-import br.upf.repository.ExpenseCategoryRepository;
+import br.upf.poupeMais.domain.model.ExpenseCategory;
+import br.upf.poupeMais.domain.repository.ExpenseCategoryRepository;
 
 @Service
 public class ExpenseCategoryService {

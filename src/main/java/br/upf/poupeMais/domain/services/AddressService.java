@@ -1,13 +1,13 @@
-package br.upf.services;
+package br.upf.poupeMais.domain.services;
 
 import java.util.List;
 import java.util.Optional;
 
+import br.upf.poupeMais.domain.repository.AddressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.upf.model.Address;
-import br.upf.repository.AddressRepository;
+import br.upf.poupeMais.domain.model.Address;
 
 @Service
 public class AddressService {

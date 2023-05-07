@@ -1,14 +1,12 @@
-package br.upf.model;
+package br.upf.poupeMais.domain.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.time.Instant;
 
 @Entity
 @Data
@@ -18,8 +16,10 @@ public class ExpenseRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Integer id;
 
+    @Column(name = "description", length = 60)
     private String description;
 
     @ManyToOne
@@ -29,5 +29,18 @@ public class ExpenseRecord {
     @ManyToOne
     @JoinColumn(name = "expense_category_id")
     private ExpenseCategory expenseCategory;
+
+    @Embedded
+    private Audit audit = new Audit();
+
+    @PrePersist
+    private void prePersist() {
+        audit.setDateRegister(Instant.now());
+    }
+
+    @PreUpdate
+    private void preUpdate() {
+        audit.setDateLastEdition(Instant.now());
+    }
 }
 

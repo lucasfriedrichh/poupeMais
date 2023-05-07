@@ -1,13 +1,13 @@
-package br.upf.services;
+package br.upf.poupeMais.domain.services;
 
 import java.util.List;
 import java.util.Optional;
 
+import br.upf.poupeMais.domain.repository.GoalsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.upf.model.Goals;
-import br.upf.repository.GoalsRepository;
+import br.upf.poupeMais.domain.model.Goals;
 
 @Service
 public class GoalsService {

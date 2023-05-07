@@ -1,3 +1,5 @@
+package br.upf.poupeMais.api.controller;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.upf.model.User;
+import br.upf.poupeMais.domain.model.User;
 
 @RestController
 @RequestMapping("/api/users")
