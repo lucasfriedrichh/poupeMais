@@ -1,65 +1,83 @@
 package br.upf.poupeMais.api.controller;
 
 import java.util.List;
+import java.util.Optional;
 
+import br.upf.poupeMais.domain.exception.EntityInUseApiException;
+import br.upf.poupeMais.domain.exception.EntityNotFoundApiException;
+import br.upf.poupeMais.domain.repository.UserRepository;
+import br.upf.poupeMais.domain.services.UserService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import br.upf.poupeMais.domain.model.User;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/user")
 public class UserController {
+
+    @Autowired
+    private UserRepository repository;
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<User> findAll() {
+        return repository.findAll();
+    }
 
     @Autowired
     private UserService userService;
 
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.findAllUsers();
-        return ResponseEntity.ok(users);
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> findById(@PathVariable Integer userId) {
+        Optional<User> userOptional = repository.findById(userId);
+
+        if (userOptional.isPresent()) {
+            return ResponseEntity.ok(userOptional.get());
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Integer id) {
-        User user = userService.findUserById(id);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(user);
-    }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User newUser = userService.saveUser(user);
-        return ResponseEntity.ok(newUser);
+    @ResponseStatus(HttpStatus.CREATED)
+    public User add(@RequestBody User user) {
+        return repository.save(user);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Integer id, @RequestBody User user) {
-        User existingUser = userService.findUserById(id);
-        if (existingUser == null) {
-            return ResponseEntity.notFound().build();
+    @PutMapping("/{userId}")
+    public ResponseEntity<?> update(
+            @PathVariable Integer userId,
+            @RequestBody User user) {
+        Optional<User> userOptional = repository.findById(userId);
+
+        if (userOptional.isPresent()){
+            User userCurrent = userOptional.get();
+
+            BeanUtils.copyProperties(user, userCurrent, "id", "audit");
+
+            return ResponseEntity.ok(repository.save(userCurrent));
         }
-        User updatedUser = userService.saveUser(user);
-        return ResponseEntity.ok(updatedUser);
+
+        return ResponseEntity.notFound().build();
+
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
-        User existingUser = userService.findUserById(id);
-        if (existingUser == null) {
-            return ResponseEntity.notFound().build();
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> delete(@PathVariable Integer userId) {
+        try {
+            userService.delete(userId);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundApiException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (EntityInUseApiException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
-        userService.deleteUser(existingUser);
-        return ResponseEntity.noContent().build();
     }
+
+
 }

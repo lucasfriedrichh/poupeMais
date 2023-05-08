@@ -1,62 +1,81 @@
 package br.upf.poupeMais.api.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import br.upf.poupeMais.domain.exception.EntityInUseApiException;
+import br.upf.poupeMais.domain.exception.EntityNotFoundApiException;
 import br.upf.poupeMais.domain.model.ExpenseRecord;
+import br.upf.poupeMais.domain.repository.ExpenseRecordRepository;
+import br.upf.poupeMais.domain.services.ExpenseCategoryService;
 import br.upf.poupeMais.domain.services.ExpenseRecordService;
+import br.upf.poupeMais.domain.services.PerfilService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/expense-records")
+import java.util.List;
+import java.util.Optional;
+
 public class ExpenseRecordController {
+
+    @Autowired
+    private ExpenseRecordRepository repository;
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<ExpenseRecord> findAll() {
+        return repository.findAll();
+    }
 
     @Autowired
     private ExpenseRecordService expenseRecordService;
 
-    @GetMapping("/")
-    public ResponseEntity<List<ExpenseRecord>> getAllExpenseRecords() {
-        List<ExpenseRecord> expenseRecords = expenseRecordService.findAllExpenseRecords();
-        return ResponseEntity.ok(expenseRecords);
-    }
+    @GetMapping("/{expenseRecordId}")
+    public ResponseEntity<?> findById(@PathVariable Integer expenseRecordId) {
+        Optional<ExpenseRecord> expenseRecordOptional = repository.findById(expenseRecordId);
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ExpenseRecord> getExpenseRecordById(@PathVariable("id") Integer id) {
-        ExpenseRecord expenseRecord = expenseRecordService.findExpenseRecordById(id);
-        if (expenseRecord == null) {
-            return ResponseEntity.notFound().build();
+        if (expenseRecordOptional.isPresent()) {
+            return ResponseEntity.ok(expenseRecordOptional.get());
         }
-        return ResponseEntity.ok(expenseRecord);
+
+        return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/")
-    public ResponseEntity<ExpenseRecord> createExpenseRecord(@RequestBody ExpenseRecord expenseRecord) {
-        expenseRecord = expenseRecordService.saveExpenseRecord(expenseRecord);
-        return ResponseEntity.ok(expenseRecord);
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ExpenseRecord add(@RequestBody ExpenseRecord expenseRecord) {
+        return repository.save(expenseRecord);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ExpenseRecord> updateExpenseRecord(@PathVariable("id") Integer id, @RequestBody ExpenseRecord expenseRecord) {
-        expenseRecord.setId(id);
-        expenseRecord = expenseRecordService.updateExpenseRecord(expenseRecord);
-        if (expenseRecord == null) {
-            return ResponseEntity.notFound().build();
+
+    @PutMapping("/{expenseRecordId}")
+    public ResponseEntity<?> update(
+            @PathVariable Integer expenseRecordId,
+            @RequestBody ExpenseRecord expenseRecord ){
+        Optional<ExpenseRecord> expenseRecordOptional = repository.findById(expenseRecordId);
+
+        if (expenseRecordOptional.isPresent()){
+            ExpenseRecord expenseRecordCurrent = expenseRecordOptional.get();
+
+            BeanUtils.copyProperties(expenseRecord, expenseRecordCurrent, "id", "audit");
+
+            return ResponseEntity.ok(repository.save(expenseRecordCurrent));
         }
-        return ResponseEntity.ok(expenseRecord);
+
+        return ResponseEntity.notFound().build();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpenseRecord(@PathVariable("id") Integer id) {
-        expenseRecordService.deleteExpenseRecord(id);
-        return ResponseEntity.ok().build();
+    @DeleteMapping("/{expenseRecordId}")
+    public ResponseEntity<?> delete(@PathVariable Integer expenseRecordId) {
+        try {
+            expenseRecordService.deleteById(expenseRecordId);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundApiException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (EntityInUseApiException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
+
+
 }
