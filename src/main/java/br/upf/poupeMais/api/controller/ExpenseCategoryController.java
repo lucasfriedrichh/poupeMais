@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@RestController
+@RequestMapping("/expensecategory")
 public class ExpenseCategoryController {
     @Autowired
     private ExpenseCategoryRepository repository;

@@ -26,10 +26,10 @@ public class Address {
     @Column(name = "state", length = 75)
     private String state;
 
-    @Column(name = "state", length = 11)
+    @Column(name = "postalcode", length = 11)
     private String postalCode;
 
-    @Column(name = "state", length = 5)
+    @Column(name = "number", length = 5)
     private Integer number;
 
 

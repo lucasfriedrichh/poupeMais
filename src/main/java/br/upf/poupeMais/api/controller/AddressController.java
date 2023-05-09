@@ -1,7 +1,6 @@
 package br.upf.poupeMais.api.controller;
 
 import br.upf.poupeMais.domain.model.Address;
-import br.upf.poupeMais.domain.model.Perfil;
 import br.upf.poupeMais.domain.repository.AddressRepository;
 import br.upf.poupeMais.domain.services.AddressService;
 import org.springframework.beans.BeanUtils;
@@ -14,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+
+@RestController
+@RequestMapping("/address")
 public class AddressController {
     @Autowired
     private AddressRepository repository;
